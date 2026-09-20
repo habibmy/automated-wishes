@@ -12,6 +12,7 @@ class Settings:
     carddav_url: str
     carddav_username: str
     carddav_password: str
+    carddav_timeout: int
     wishes_include_group: str
     wishes_exclude_group: str
     timezone: str
@@ -23,6 +24,9 @@ def load_settings() -> Settings:
         carddav_url=os.environ["CARDDAV_URL"],
         carddav_username=os.environ["CARDDAV_USERNAME"],
         carddav_password=os.environ["CARDDAV_PASSWORD"],
+        carddav_timeout=int(
+            os.environ.get("CARDDAV_TIMEOUT", "15")
+        ),
         wishes_include_group=os.environ.get(
             "WISHES_INCLUDE_GROUP",
             "Wishes",

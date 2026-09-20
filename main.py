@@ -1,16 +1,22 @@
+from app.carddav import CardDAVClient
 from app.config import load_settings
 
 
 def main():
     settings = load_settings()
 
-    print("Configuration loaded")
-    print(f"CardDAV URL: {settings.carddav_url}")
-    print(f"CardDAV username: {settings.carddav_username}")
-    print(f"Include group: {settings.wishes_include_group}")
-    print(f"Exclude group: {settings.wishes_exclude_group}")
-    print(f"Timezone: {settings.timezone}")
-    print(f"Dry run: {settings.dry_run}")
+    client = CardDAVClient(
+        url=settings.carddav_url,
+        username=settings.carddav_username,
+        password=settings.carddav_password,
+    )
+
+    resources = client.fetch_contacts()
+
+    print(f"Retrieved {len(resources)} CardDAV resources")
+
+    for resource in resources[:3]:
+        print(f"- {resource.href}")
 
 
 if __name__ == "__main__":
