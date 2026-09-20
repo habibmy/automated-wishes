@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Automated Wishes</title>
+</head>
+
+<body>
+    <main>
+        <h1>Contacts</h1>
+
+        <p>{{ contacts|length }} contacts</p>
+
+        <form method="post">
+
+            <button type="submit">
+                Save Selection
+            </button>
+
+            <ul>
+                {% for contact in contacts %}
+                    <li>
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="contact_ids"
+                                value="{{ contact['id'] }}"
+                                {% if contact['id'] in selected_contact_ids %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            <strong>{{ contact["name"] }}</strong>
+
+                            {% if contact["phones"] %}
+                                — {{ contact["phones"] }}
+                            {% endif %}
+
+                            {% if contact["emails"] %}
+                                — {{ contact["emails"] }}
+                            {% endif %}
+                        </label>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <button type="submit">
+                Save Selection
+            </button>
+
+        </form>
+    </main>
+</body>
+</html>

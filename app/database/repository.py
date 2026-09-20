@@ -83,3 +83,21 @@ class ContactRepository:
                 ORDER BY name COLLATE NOCASE
                 """
             ).fetchall()
+
+    def get_selected_contact_ids(self) -> set[int]:
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT contact_id FROM selected_contacts"
+            ).fetchall()
+
+        return {row["contact_id"] for row in rows}
+
+
+    def set_selected_contacts(self, contact_ids: set[int]) -> None:
+        with self._connect() as connection:
+            connection.execute("DELETE FROM selected_contacts")
+
+            connection.executemany(
+                "INSERT INTO selected_contacts (contact_id) VALUES (?)",
+                [(contact_id,) for contact_id in contact_ids],
+            )
