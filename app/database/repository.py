@@ -133,9 +133,9 @@ class ContactRepository:
                 [(contact_id,) for contact_id in contact_ids],
             )
 
-    def get_selected_contacts(self) -> list[sqlite3.Row]:
+    def get_selected_contacts(self) -> list[Contact]:
         with self._connect() as connection:
-            return connection.execute(
+            rows = connection.execute(
                 """
                 SELECT
                     id,
@@ -154,3 +154,31 @@ class ContactRepository:
                 ORDER BY name COLLATE NOCASE
                 """
             ).fetchall()
+
+        return [self._row_to_contact(row) for row in rows]
+    
+    def _row_to_contact(self, row: sqlite3.Row) -> Contact:
+        return Contact(
+            uid=row["source_uid"],
+            name=row["name"],
+            phones=tuple(
+                phone
+                for phone in row["phones"].splitlines()
+                if phone
+            ),
+            emails=tuple(
+                email
+                for email in row["emails"].splitlines()
+                if email
+            ),
+            birthday=(
+                date.fromisoformat(row["birthday"])
+                if row["birthday"]
+                else None
+            ),
+            anniversary=(
+                date.fromisoformat(row["anniversary"])
+                if row["anniversary"]
+                else None
+            ),
+        )
