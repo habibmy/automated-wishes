@@ -17,6 +17,7 @@ class Settings:
     wishes_exclude_group: str
     timezone: str
     dry_run: bool
+    reminder_days_before: int
 
 
 def load_settings() -> Settings:
@@ -43,4 +44,7 @@ def load_settings() -> Settings:
             "DRY_RUN",
             "true",
         ).lower() == "true",
+        reminder_days_before=int(
+            os.environ.get("REMINDER_DAYS_BEFORE", "10")
+        ),
     )
