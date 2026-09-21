@@ -6,6 +6,7 @@ from datetime import date
 from app.carddav import CardDAVClient
 from app.config import load_settings
 from app.sync.carddav import sync_carddav_contacts
+from app.reminders.service import upcoming_occasions
 
 contacts_bp = Blueprint("contacts", __name__)
 
@@ -48,3 +49,19 @@ def sync():
     )
 
     return redirect(url_for("contacts.contacts", synced=count))
+
+@contacts_bp.route("/upcoming")
+def upcoming():
+    selected_contacts = repository.get_selected_contacts()
+
+    occasions = upcoming_occasions(
+        selected_contacts,
+        today=date.today(),
+        within_days=30,
+    )
+
+    return render_template(
+    "upcoming.html",
+    occasions=occasions,
+    today=date.today(),
+    )

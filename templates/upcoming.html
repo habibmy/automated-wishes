@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upcoming Occasions</title>
+  </head>
+  <body>
+    <h1>Upcoming Occasions</h1>
+
+    <p>
+      <a href="{{ url_for('contacts.contacts') }}"> Manage Contacts </a>
+    </p>
+
+    {% if occasions %}
+    <ul>
+      {% for occasion in occasions %}
+      <li>
+        {% if occasion.kind == "birthday" %} 🎂 {% elif occasion.kind ==
+        "anniversary" %} 💍 {% endif %}
+
+        <strong>{{ occasion.contact_name }}</strong>
+        — {{ occasion.kind|capitalize }} — {{ occasion.next_date.strftime("%d %B
+        %Y") }} {% if occasion.days_until(today) == 0 %} — Today {% elif
+        occasion.days_until(today) == 1 %} — Tomorrow {% else %} — In {{
+        occasion.days_until(today) }} days {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No upcoming occasions in the next 30 days.</p>
+    {% endif %}
+  </body>
+</html>
