@@ -10,7 +10,13 @@
 <body>
     <main>
         <h1>Contacts</h1>
+<form method="post" action="{{ url_for('contacts.sync') }}">
+    <button type="submit">Sync Contacts</button>
+</form>
 
+{% if synced %}
+    <p>✅ Synced {{ synced }} contacts.</p>
+{% endif %}
         <p>{{ contacts|length }} contacts</p>
 
         <form method="post">
