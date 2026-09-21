@@ -35,11 +35,19 @@
                             <strong>{{ contact["name"] }}</strong>
 
                             {% if contact["phones"] %}
-                                — {{ contact["phones"] }}
+                                <div>📞 {{ contact["phones"] }}</div>
                             {% endif %}
 
                             {% if contact["emails"] %}
-                                — {{ contact["emails"] }}
+                                <div>✉️ {{ contact["emails"] }}</div>
+                            {% endif %}
+
+                            {% if contact["birthday"] %}
+                                <div>🎂 {{ contact["birthday"] }}</div>
+                            {% endif %}
+
+                            {% if contact["anniversary"] %}
+                                <div>💍 {{ contact["anniversary"] }}</div>
                             {% endif %}
                         </label>
                     </li>
