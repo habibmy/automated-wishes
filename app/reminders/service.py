@@ -31,3 +31,20 @@ def upcoming_occasions(
         ]
 
     return occasions
+
+def reminder_candidates(
+    contacts: list[Contact],
+    today: date,
+    days_before: int,
+) -> list[Occasion]:
+    occasions = upcoming_occasions(
+        contacts,
+        today,
+        within_days=days_before,
+    )
+
+    return [
+        occasion
+        for occasion in occasions
+        if occasion.days_until(today) == days_before
+    ]
