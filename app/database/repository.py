@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date
 from pathlib import Path
 
 from app.contacts.models import Contact
@@ -26,6 +27,8 @@ class ContactRepository:
                     name TEXT NOT NULL,
                     phones TEXT NOT NULL,
                     emails TEXT NOT NULL,
+                    birthday TEXT,
+                    anniversary TEXT,
                     UNIQUE(source, source_uid)
                 );
 
@@ -35,6 +38,23 @@ class ContactRepository:
                 );
                 """
             )
+
+            columns = {
+                row["name"]
+                for row in connection.execute(
+                    "PRAGMA table_info(contacts)"
+                ).fetchall()
+            }
+
+            if "birthday" not in columns:
+                connection.execute(
+                    "ALTER TABLE contacts ADD COLUMN birthday TEXT"
+                )
+
+            if "anniversary" not in columns:
+                connection.execute(
+                    "ALTER TABLE contacts ADD COLUMN anniversary TEXT"
+                )
 
     def save_contacts(
         self,
@@ -50,14 +70,18 @@ class ContactRepository:
                         source_uid,
                         name,
                         phones,
-                        emails
+                        emails,
+                        birthday,
+                        anniversary
                     )
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(source, source_uid)
                     DO UPDATE SET
                         name = excluded.name,
                         phones = excluded.phones,
-                        emails = excluded.emails
+                        emails = excluded.emails,
+                        birthday = excluded.birthday,
+                        anniversary = excluded.anniversary
                     """,
                     (
                         source,
@@ -65,6 +89,12 @@ class ContactRepository:
                         contact.name,
                         "\n".join(contact.phones),
                         "\n".join(contact.emails),
+                        contact.birthday.isoformat()
+                        if contact.birthday
+                        else None,
+                        contact.anniversary.isoformat()
+                        if contact.anniversary
+                        else None,
                     ),
                 )
 
@@ -78,7 +108,9 @@ class ContactRepository:
                     source_uid,
                     name,
                     phones,
-                    emails
+                    emails,
+                    birthday,
+                    anniversary
                 FROM contacts
                 ORDER BY name COLLATE NOCASE
                 """
@@ -91,7 +123,6 @@ class ContactRepository:
             ).fetchall()
 
         return {row["contact_id"] for row in rows}
-
 
     def set_selected_contacts(self, contact_ids: set[int]) -> None:
         with self._connect() as connection:
