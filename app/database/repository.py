@@ -132,3 +132,25 @@ class ContactRepository:
                 "INSERT INTO selected_contacts (contact_id) VALUES (?)",
                 [(contact_id,) for contact_id in contact_ids],
             )
+
+    def get_selected_contacts(self) -> list[sqlite3.Row]:
+        with self._connect() as connection:
+            return connection.execute(
+                """
+                SELECT
+                    id,
+                    source,
+                    source_uid,
+                    name,
+                    phones,
+                    emails,
+                    birthday,
+                    anniversary
+                FROM contacts
+                WHERE id IN (
+                    SELECT contact_id
+                    FROM selected_contacts
+                )
+                ORDER BY name COLLATE NOCASE
+                """
+            ).fetchall()
