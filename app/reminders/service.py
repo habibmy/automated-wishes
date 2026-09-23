@@ -2,7 +2,8 @@ from datetime import date
 
 from app.contacts.models import Contact
 from app.reminders.occasions import Occasion, get_upcoming_occasions
-
+from app.database.repository import ContactRepository
+from app.notifications.ntfy import NtfyNotifier
 
 def upcoming_occasions(
     contacts: list[Contact],
@@ -48,3 +49,50 @@ def reminder_candidates(
         for occasion in occasions
         if occasion.days_until(today) == days_before
     ]
+
+def send_reminders(
+    repository: ContactRepository,
+    notifier: NtfyNotifier,
+    contacts: list[Contact],
+    today: date,
+    days_before: int,
+) -> int:
+    candidates = reminder_candidates(
+        contacts,
+        today,
+        days_before,
+    )
+
+    sent_count = 0
+
+    for occasion in candidates:
+        if repository.has_sent_reminder(
+            occasion.contact_uid,
+            occasion.kind,
+            occasion.next_date,
+        ):
+            continue
+
+        title = (
+            "Birthday Reminder"
+            if occasion.kind == "birthday"
+            else "Anniversary Reminder"
+        )
+
+        message = (
+            f"{occasion.contact_name}'s "
+            f"{occasion.kind} is in {days_before} days "
+            f"({occasion.next_date.strftime('%d %B %Y')})."
+        )
+
+        notifier.send(title, message)
+
+        repository.mark_reminder_sent(
+            occasion.contact_uid,
+            occasion.kind,
+            occasion.next_date,
+        )
+
+        sent_count += 1
+
+    return sent_count
