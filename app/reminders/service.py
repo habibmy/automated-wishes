@@ -85,7 +85,10 @@ def send_reminders(
             f"({occasion.next_date.strftime('%d %B %Y')})."
         )
 
-        notifier.send(title, message)
+        try:
+            notifier.send(title, message)
+        except Exception:
+            continue
 
         repository.mark_reminder_sent(
             occasion.contact_uid,
