@@ -17,6 +17,11 @@
 {% if synced %}
     <p>✅ Synced {{ synced }} contacts.</p>
 {% endif %}
+{% if sync_error %}
+    <p>
+        ❌ Sync failed: {{ sync_error }}
+    </p>
+{% endif %}
         <p>{{ contacts|length }} contacts</p>
 
         <form method="post">

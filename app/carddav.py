@@ -31,20 +31,22 @@ class CardDAVClient:
         self.session.auth = (username, password)
 
     def fetch_contacts(self) -> list[CardDAVResource]:
-        response = self.session.request(
-            method="REPORT",
-            url=self.url,
-            headers={
-                "Depth": "1",
-                "Content-Type": "application/xml; charset=utf-8",
-            },
-            data=self._addressbook_query(),
-        )
+        try:
+            response = self.session.request(
+                method="REPORT",
+                url=self.url,
+                headers={
+                    "Depth": "1",
+                    "Content-Type": "application/xml; charset=utf-8",
+                },
+                data=self._addressbook_query(),
+            )
+        except requests.RequestException as error:
+            raise CardDAVError(f"CardDAV request failed: {error}") from error
 
         if not response.ok:
             raise CardDAVError(
-                f"CardDAV request failed: "
-                f"HTTP {response.status_code} {response.reason}"
+                f"CardDAV request failed: HTTP {response.status_code} {response.reason}"
             )
 
         return self._parse_report(response.content)
@@ -71,12 +73,8 @@ class CardDAVClient:
 
         for response in root.findall(f"{{{DAV_NAMESPACE}}}response"):
             href_element = response.find(f"{{{DAV_NAMESPACE}}}href")
-            address_data = response.find(
-                f".//{{{CARDDAV_NAMESPACE}}}address-data"
-            )
-            etag_element = response.find(
-                f".//{{{DAV_NAMESPACE}}}getetag"
-            )
+            address_data = response.find(f".//{{{CARDDAV_NAMESPACE}}}address-data")
+            etag_element = response.find(f".//{{{DAV_NAMESPACE}}}getetag")
 
             if href_element is None or address_data is None:
                 continue
@@ -84,11 +82,7 @@ class CardDAVClient:
             resources.append(
                 CardDAVResource(
                     href=href_element.text or "",
-                    etag=(
-                        etag_element.text
-                        if etag_element is not None
-                        else None
-                    ),
+                    etag=(etag_element.text if etag_element is not None else None),
                     vcard=address_data.text or "",
                 )
             )
