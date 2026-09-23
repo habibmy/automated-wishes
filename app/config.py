@@ -18,6 +18,7 @@ class Settings:
     timezone: str
     dry_run: bool
     reminder_days_before: int
+    ntfy_topic_url: str
 
 
 def load_settings() -> Settings:
@@ -47,4 +48,5 @@ def load_settings() -> Settings:
         reminder_days_before=int(
             os.environ.get("REMINDER_DAYS_BEFORE", "10")
         ),
+        ntfy_topic_url=os.environ["NTFY_TOPIC_URL"],
     )
