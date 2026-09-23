@@ -19,6 +19,28 @@ def run_scheduler(
         now = datetime.now(timezone)
         today = now.date()
 
+        check_time = datetime.strptime(
+            settings.reminder_check_time,
+            "%H:%M",
+        ).time()
+
+        next_run = datetime.combine(
+            today,
+            check_time,
+            tzinfo=timezone,
+        )
+
+        if next_run <= now:
+            next_run += timedelta(days=1)
+
+        seconds_until_next_run = (
+            next_run - now
+        ).total_seconds()
+
+        time.sleep(max(1, seconds_until_next_run))
+
+        today = datetime.now(timezone).date()
+
         send_reminders(
             repository=repository,
             notifier=notifier,
@@ -26,16 +48,3 @@ def run_scheduler(
             today=today,
             days_before=settings.reminder_days_before,
         )
-
-        tomorrow = today + timedelta(days=1)
-        next_run = datetime.combine(
-            tomorrow,
-            datetime.min.time(),
-            tzinfo=timezone,
-        )
-
-        seconds_until_next_run = (
-            next_run - datetime.now(timezone)
-        ).total_seconds()
-
-        time.sleep(max(1, seconds_until_next_run))
