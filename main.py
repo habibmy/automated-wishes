@@ -1,3 +1,4 @@
+import logging
 import threading
 
 from app.config import load_settings
@@ -5,6 +6,12 @@ from app.database.repository import ContactRepository
 from app.notifications.ntfy import NtfyNotifier
 from app.reminders.scheduler import run_scheduler
 from app.web import create_app
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 
 settings = load_settings()

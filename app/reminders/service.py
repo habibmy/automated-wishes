@@ -1,9 +1,14 @@
+import logging
 from datetime import date
 
 from app.contacts.models import Contact
-from app.reminders.occasions import Occasion, get_upcoming_occasions
 from app.database.repository import ContactRepository
 from app.notifications.ntfy import NtfyNotifier
+from app.reminders.occasions import Occasion, get_upcoming_occasions
+
+
+logger = logging.getLogger(__name__)
+
 
 def upcoming_occasions(
     contacts: list[Contact],
@@ -33,6 +38,7 @@ def upcoming_occasions(
 
     return occasions
 
+
 def reminder_candidates(
     contacts: list[Contact],
     today: date,
@@ -49,6 +55,7 @@ def reminder_candidates(
         for occasion in occasions
         if occasion.days_until(today) == days_before
     ]
+
 
 def send_reminders(
     repository: ContactRepository,
@@ -88,12 +95,23 @@ def send_reminders(
         try:
             notifier.send(title, message)
         except Exception:
+            logger.exception(
+                "Failed to send %s reminder for %s",
+                occasion.kind,
+                occasion.contact_name,
+            )
             continue
 
         repository.mark_reminder_sent(
             occasion.contact_uid,
             occasion.kind,
             occasion.next_date,
+        )
+
+        logger.info(
+            "Sent %s reminder for %s",
+            occasion.kind,
+            occasion.contact_name,
         )
 
         sent_count += 1
