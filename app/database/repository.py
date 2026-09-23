@@ -3,7 +3,7 @@ from datetime import date
 from pathlib import Path
 
 from app.contacts.models import Contact
-
+from datetime import date, datetime
 
 class ContactRepository:
     def __init__(self, database_path: str):
@@ -36,6 +36,16 @@ class ContactRepository:
                     contact_id INTEGER PRIMARY KEY,
                     FOREIGN KEY(contact_id) REFERENCES contacts(id)
                 );
+
+                CREATE TABLE IF NOT EXISTS sent_reminders (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    contact_uid TEXT NOT NULL,
+                    kind TEXT NOT NULL,
+                    occasion_date TEXT NOT NULL,
+                    sent_at TEXT NOT NULL,
+                    UNIQUE(contact_uid, kind, occasion_date)
+                );
+
                 """
             )
 
@@ -181,4 +191,54 @@ class ContactRepository:
                 if row["anniversary"]
                 else None
             ),
+        )
+
+    def has_sent_reminder(
+        self,
+        contact_uid: str,
+        kind: str,
+        occasion_date: date,
+    ) -> bool:
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT 1
+                FROM sent_reminders
+                WHERE contact_uid = ?
+                AND kind = ?
+                AND occasion_date = ?
+                LIMIT 1
+                """,
+                (
+                    contact_uid,
+                    kind,
+                    occasion_date.isoformat(),
+                ),
+            ).fetchone()
+
+        return row is not None
+
+    def mark_reminder_sent(
+        self,
+        contact_uid: str,
+        kind: str,
+        occasion_date: date,
+    ) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO sent_reminders (
+                    contact_uid,
+                    kind,
+                    occasion_date,
+                    sent_at
+                )
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    contact_uid,
+                    kind,
+                    occasion_date.isoformat(),
+                    datetime.now().isoformat(timespec="seconds"),
+                ),
         )
