@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Contacts - Automated Wishes</title>
+
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
@@ -26,22 +28,29 @@
 
     <main>
       <div class="container">
+
+        <!-- Page heading -->
         <div class="page-header">
           <div>
             <h1>Contacts</h1>
+
             <p class="subtitle">
-              Choose the contacts whose birthdays and anniversaries you want
-              reminders for.
+              Choose the contacts whose birthdays and anniversaries
+              you want reminders for.
             </p>
           </div>
 
           <div class="actions">
             <form method="post" action="{{ url_for('contacts.sync') }}">
-              <button type="submit">Sync Contacts</button>
+              <button type="submit">
+                Sync Contacts
+              </button>
             </form>
           </div>
         </div>
 
+
+        <!-- Sync messages -->
         {% if synced %}
         <div class="notice notice-success">
           Synced {{ synced }} contacts successfully.
@@ -54,61 +63,254 @@
         </div>
         {% endif %}
 
-        <div class="card">
-          <p class="subtitle">
-            {{ contacts|length }} contacts
-          </p>
 
-          <form method="post">
-            <div class="actions" style="margin-bottom: 16px;">
-              <button type="submit">Save Selection</button>
+        <!-- Contact selection -->
+        <div class="card">
+
+          <div class="contact-header">
+            <div>
+              <strong>{{ contacts|length }}</strong>
+              contacts
             </div>
 
-            <ul class="contact-list">
+            <div id="selected-count" class="selected-count">
+              0 selected
+            </div>
+          </div>
+
+
+          <!-- Search and selection controls -->
+          <div class="selection-toolbar">
+
+            <input
+              type="search"
+              id="contact-search"
+              placeholder="Search contacts..."
+              autocomplete="off"
+            />
+
+            <div class="selection-actions">
+
+              <button
+                type="button"
+                class="button-secondary"
+                id="select-all"
+              >
+                Select All
+              </button>
+
+            <button
+                type="button"
+                class="button-secondary"
+                id="select-none"
+                >
+                Clear Selection
+                </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Save selection -->
+          <form method="post">
+
+            <div class="actions save-selection">
+              <button type="submit">
+                Save Selection
+              </button>
+            </div>
+
+
+            <!-- Contacts -->
+            <ul class="contact-list" id="contact-list">
+
               {% for contact in contacts %}
+
               <li class="contact">
-                <input
-                  type="checkbox"
-                  name="contact_ids"
-                  value="{{ contact['id'] }}"
-                  {% if contact['id'] in selected_contact_ids %}
-                  checked
-                  {% endif %}
-                />
 
-                <div>
-                  <div class="contact-name">
-                    {{ contact["name"] }}
+                <label class="contact-label">
+
+                  <input
+                    type="checkbox"
+                    name="contact_ids"
+                    value="{{ contact['id'] }}"
+                    {% if contact['id'] in selected_contact_ids %}
+                    checked
+                    {% endif %}
+                  />
+
+                  <div class="contact-content">
+
+                    <div class="contact-name">
+                      {{ contact["name"] }}
+                    </div>
+
+                    <div class="contact-details">
+
+                      {% if contact["phones"] %}
+                      <div>
+                        📞 {{ contact["phones"] }}
+                      </div>
+                      {% endif %}
+
+                      {% if contact["emails"] %}
+                      <div>
+                        ✉️ {{ contact["emails"] }}
+                      </div>
+                      {% endif %}
+
+                      {% if contact["birthday"] %}
+                      <div>
+                        🎂 {{ contact["birthday"] }}
+                      </div>
+                      {% endif %}
+
+                      {% if contact["anniversary"] %}
+                      <div>
+                        💍 {{ contact["anniversary"] }}
+                      </div>
+                      {% endif %}
+
+                    </div>
+
                   </div>
 
-                  <div class="contact-details">
-                    {% if contact["phones"] %}
-                    <div>📞 {{ contact["phones"] }}</div>
-                    {% endif %}
+                </label>
 
-                    {% if contact["emails"] %}
-                    <div>✉️ {{ contact["emails"] }}</div>
-                    {% endif %}
-
-                    {% if contact["birthday"] %}
-                    <div>🎂 {{ contact["birthday"] }}</div>
-                    {% endif %}
-
-                    {% if contact["anniversary"] %}
-                    <div>💍 {{ contact["anniversary"] }}</div>
-                    {% endif %}
-                  </div>
-                </div>
               </li>
+
               {% endfor %}
+
             </ul>
 
-            <div class="actions" style="margin-top: 16px;">
-              <button type="submit">Save Selection</button>
+
+            <!-- Save selection -->
+            <div class="actions save-selection-bottom">
+              <button type="submit">
+                Save Selection
+              </button>
             </div>
+
           </form>
+
         </div>
+
       </div>
     </main>
+
+
+    <!-- Contact selection JavaScript -->
+    <script>
+      const searchInput = document.getElementById("contact-search");
+      const contactList = document.getElementById("contact-list");
+      const selectedCount = document.getElementById("selected-count");
+
+      const selectAllButton =
+        document.getElementById("select-all");
+
+      const selectNoneButton =
+        document.getElementById("select-none");
+
+
+      const contacts = Array.from(
+        contactList.querySelectorAll(".contact")
+      );
+
+
+      function getCheckboxes() {
+        return contacts.map((contact) =>
+          contact.querySelector(
+            'input[type="checkbox"]'
+          )
+        );
+      }
+
+
+      function updateSelectedCount() {
+        const selected = getCheckboxes().filter(
+          (checkbox) => checkbox.checked
+        ).length;
+
+        selectedCount.textContent =
+          `${selected} selected`;
+      }
+
+
+      /*
+       * Search contacts
+       */
+      searchInput.addEventListener("input", () => {
+
+        const query =
+          searchInput.value.trim().toLowerCase();
+
+
+        contacts.forEach((contact) => {
+
+          const name =
+            contact
+              .querySelector(".contact-name")
+              .textContent
+              .toLowerCase();
+
+
+          contact.hidden =
+            query !== "" &&
+            !name.includes(query);
+
+        });
+
+      });
+
+
+      /*
+       * Select all contacts
+       */
+      selectAllButton.addEventListener("click", () => {
+
+        getCheckboxes().forEach((checkbox) => {
+          checkbox.checked = true;
+        });
+
+        updateSelectedCount();
+
+      });
+
+
+      /*
+       * Clear all contacts
+       */
+      selectNoneButton.addEventListener("click", () => {
+
+        getCheckboxes().forEach((checkbox) => {
+          checkbox.checked = false;
+        });
+
+        updateSelectedCount();
+
+      });
+
+
+      /*
+       * Update counter whenever a checkbox changes
+       */
+      getCheckboxes().forEach((checkbox) => {
+
+        checkbox.addEventListener(
+          "change",
+          updateSelectedCount
+        );
+
+      });
+
+
+      /*
+       * Initial counter
+       */
+      updateSelectedCount();
+
+    </script>
+
   </body>
 </html>
