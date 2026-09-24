@@ -1,75 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacts - Automated Wishes</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
 
-    <title>Automated Wishes</title>
-</head>
+  <body>
+    <header>
+      <div class="container nav">
+        <a class="brand" href="{{ url_for('contacts.upcoming') }}">
+          Automated Wishes
+        </a>
 
-<body>
+        <nav class="nav-links">
+          <a href="{{ url_for('contacts.upcoming') }}">Upcoming</a>
+          <a href="{{ url_for('contacts.contacts') }}">Contacts</a>
+        </nav>
+      </div>
+    </header>
+
     <main>
-        <h1>Contacts</h1>
-<form method="post" action="{{ url_for('contacts.sync') }}">
-    <button type="submit">Sync Contacts</button>
-</form>
+      <div class="container">
+        <div class="page-header">
+          <div>
+            <h1>Contacts</h1>
+            <p class="subtitle">
+              Choose the contacts whose birthdays and anniversaries you want
+              reminders for.
+            </p>
+          </div>
 
-{% if synced %}
-    <p>✅ Synced {{ synced }} contacts.</p>
-{% endif %}
-{% if sync_error %}
-    <p>
-        ❌ Sync failed: {{ sync_error }}
-    </p>
-{% endif %}
-        <p>{{ contacts|length }} contacts</p>
+          <div class="actions">
+            <form method="post" action="{{ url_for('contacts.sync') }}">
+              <button type="submit">Sync Contacts</button>
+            </form>
+          </div>
+        </div>
 
-        <form method="post">
+        {% if synced %}
+        <div class="notice notice-success">
+          Synced {{ synced }} contacts successfully.
+        </div>
+        {% endif %}
 
-            <button type="submit">
-                Save Selection
-            </button>
+        {% if sync_error %}
+        <div class="notice notice-error">
+          Sync failed: {{ sync_error }}
+        </div>
+        {% endif %}
 
-            <ul>
-                {% for contact in contacts %}
-                    <li>
-                        <label>
-                            <input
-                                type="checkbox"
-                                name="contact_ids"
-                                value="{{ contact['id'] }}"
-                                {% if contact['id'] in selected_contact_ids %}
-                                    checked
-                                {% endif %}
-                            >
+        <div class="card">
+          <p class="subtitle">
+            {{ contacts|length }} contacts
+          </p>
 
-                            <strong>{{ contact["name"] }}</strong>
+          <form method="post">
+            <div class="actions" style="margin-bottom: 16px;">
+              <button type="submit">Save Selection</button>
+            </div>
 
-                            {% if contact["phones"] %}
-                                <div>📞 {{ contact["phones"] }}</div>
-                            {% endif %}
+            <ul class="contact-list">
+              {% for contact in contacts %}
+              <li class="contact">
+                <input
+                  type="checkbox"
+                  name="contact_ids"
+                  value="{{ contact['id'] }}"
+                  {% if contact['id'] in selected_contact_ids %}
+                  checked
+                  {% endif %}
+                />
 
-                            {% if contact["emails"] %}
-                                <div>✉️ {{ contact["emails"] }}</div>
-                            {% endif %}
+                <div>
+                  <div class="contact-name">
+                    {{ contact["name"] }}
+                  </div>
 
-                            {% if contact["birthday"] %}
-                                <div>🎂 {{ contact["birthday"] }}</div>
-                            {% endif %}
+                  <div class="contact-details">
+                    {% if contact["phones"] %}
+                    <div>📞 {{ contact["phones"] }}</div>
+                    {% endif %}
 
-                            {% if contact["anniversary"] %}
-                                <div>💍 {{ contact["anniversary"] }}</div>
-                            {% endif %}
-                        </label>
-                    </li>
-                {% endfor %}
+                    {% if contact["emails"] %}
+                    <div>✉️ {{ contact["emails"] }}</div>
+                    {% endif %}
+
+                    {% if contact["birthday"] %}
+                    <div>🎂 {{ contact["birthday"] }}</div>
+                    {% endif %}
+
+                    {% if contact["anniversary"] %}
+                    <div>💍 {{ contact["anniversary"] }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </li>
+              {% endfor %}
             </ul>
 
-            <button type="submit">
-                Save Selection
-            </button>
-
-        </form>
+            <div class="actions" style="margin-top: 16px;">
+              <button type="submit">Save Selection</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </main>
-</body>
+  </body>
 </html>

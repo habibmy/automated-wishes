@@ -3,32 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Upcoming Occasions</title>
+    <title>Upcoming - Automated Wishes</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
   </head>
+
   <body>
-    <h1>Upcoming Occasions</h1>
+    <header>
+      <div class="container nav">
+        <a class="brand" href="{{ url_for('contacts.upcoming') }}">
+          Automated Wishes
+        </a>
 
-    <p>
-      <a href="{{ url_for('contacts.contacts') }}"> Manage Contacts </a>
-    </p>
+        <nav class="nav-links">
+          <a href="{{ url_for('contacts.upcoming') }}">Upcoming</a>
+          <a href="{{ url_for('contacts.contacts') }}">Contacts</a>
+        </nav>
+      </div>
+    </header>
 
-    {% if occasions %}
-    <ul>
-      {% for occasion in occasions %}
-      <li>
-        {% if occasion.kind == "birthday" %} 🎂 {% elif occasion.kind ==
-        "anniversary" %} 💍 {% endif %}
+    <main>
+      <div class="container">
+        <div class="page-header">
+          <div>
+            <h1>Upcoming Occasions</h1>
+            <p class="subtitle">
+              Birthdays and anniversaries coming up in the next 30 days.
+            </p>
+          </div>
+        </div>
 
-        <strong>{{ occasion.contact_name }}</strong>
-        — {{ occasion.kind|capitalize }} — {{ occasion.next_date.strftime("%d %B
-        %Y") }} {% if occasion.days_until(today) == 0 %} — Today {% elif
-        occasion.days_until(today) == 1 %} — Tomorrow {% else %} — In {{
-        occasion.days_until(today) }} days {% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>No upcoming occasions in the next 30 days.</p>
-    {% endif %}
+        {% if occasions %}
+        <div class="card">
+          <ul class="occasion-list">
+            {% for occasion in occasions %}
+            <li class="occasion">
+              <div class="occasion-icon">
+                {% if occasion.kind == "birthday" %} 🎂 {% elif occasion.kind ==
+                "anniversary" %} 💍 {% endif %}
+              </div>
+
+              <div class="occasion-info">
+                <div class="occasion-name">{{ occasion.contact_name }}</div>
+
+                <div class="occasion-meta">
+                  {{ occasion.kind|capitalize }} · {{
+                  occasion.next_date.strftime("%d %B %Y") }}
+                </div>
+              </div>
+
+              <div class="occasion-countdown">
+                {% if occasion.days_until(today) == 0 %} Today {% elif
+                occasion.days_until(today) == 1 %} Tomorrow {% else %} In {{
+                occasion.days_until(today) }} days {% endif %}
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% else %}
+        <div class="card empty">
+          <p>No upcoming occasions in the next 30 days.</p>
+        </div>
+        {% endif %}
+      </div>
+    </main>
   </body>
 </html>
