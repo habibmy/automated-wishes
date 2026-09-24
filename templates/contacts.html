@@ -29,7 +29,6 @@
     <main>
       <div class="container">
 
-        <!-- Page heading -->
         <div class="page-header">
           <div>
             <h1>Contacts</h1>
@@ -50,12 +49,12 @@
         </div>
 
 
-        <!-- Sync messages -->
         {% if synced %}
         <div class="notice notice-success">
           Synced {{ synced }} contacts successfully.
         </div>
         {% endif %}
+
 
         {% if sync_error %}
         <div class="notice notice-error">
@@ -64,7 +63,6 @@
         {% endif %}
 
 
-        <!-- Contact selection -->
         <div class="card">
 
           <div class="contact-header">
@@ -99,20 +97,19 @@
                 Select All
               </button>
 
-            <button
+              <button
                 type="button"
                 class="button-secondary"
                 id="select-none"
-                >
+              >
                 Clear Selection
-                </button>
+              </button>
 
             </div>
 
           </div>
 
 
-          <!-- Save selection -->
           <form method="post">
 
             <div class="actions save-selection">
@@ -122,70 +119,113 @@
             </div>
 
 
-            <!-- Contacts -->
-            <ul class="contact-list" id="contact-list">
+            <!-- Responsive table -->
+            <div class="table-wrapper">
 
-              {% for contact in contacts %}
+              <table class="contacts-table">
 
-              <li class="contact">
+                <thead>
+                  <tr>
+                    <th class="select-column">
+                      Select
+                    </th>
 
-                <label class="contact-label">
+                    <th>
+                      Name
+                    </th>
 
-                  <input
-                    type="checkbox"
-                    name="contact_ids"
-                    value="{{ contact['id'] }}"
-                    {% if contact['id'] in selected_contact_ids %}
-                    checked
-                    {% endif %}
-                  />
+                    <th>
+                      Phone
+                    </th>
 
-                  <div class="contact-content">
+                    <th>
+                      Email
+                    </th>
 
-                    <div class="contact-name">
+                    <th>
+                      Birthday
+                    </th>
+
+                    <th>
+                      Anniversary
+                    </th>
+                  </tr>
+                </thead>
+
+
+                <tbody id="contact-list">
+
+                  {% for contact in contacts %}
+
+                  <tr class="contact-row">
+
+                    <td class="select-column">
+                      <input
+                        type="checkbox"
+                        name="contact_ids"
+                        value="{{ contact['id'] }}"
+                        {% if contact['id'] in selected_contact_ids %}
+                        checked
+                        {% endif %}
+                      />
+                    </td>
+
+
+                    <td class="contact-name-cell">
                       {{ contact["name"] }}
-                    </div>
+                    </td>
 
-                    <div class="contact-details">
 
+                    <td>
                       {% if contact["phones"] %}
-                      <div>
-                        📞 {{ contact["phones"] }}
-                      </div>
+                        {{ contact["phones"]|replace('\n', ', ') }}
+                      {% else %}
+                        <span class="muted">—</span>
                       {% endif %}
+                    </td>
 
+
+                    <td>
                       {% if contact["emails"] %}
-                      <div>
-                        ✉️ {{ contact["emails"] }}
-                      </div>
+                        {{ contact["emails"]|replace('\n', ', ') }}
+                      {% else %}
+                        <span class="muted">—</span>
                       {% endif %}
+                    </td>
 
+
+                    <td>
                       {% if contact["birthday"] %}
-                      <div>
-                        🎂 {{ contact["birthday"] }}
-                      </div>
+                        <span class="occasion-badge birthday">
+                          🎂 {{ contact["birthday"] }}
+                        </span>
+                      {% else %}
+                        <span class="muted">—</span>
                       {% endif %}
+                    </td>
 
+
+                    <td>
                       {% if contact["anniversary"] %}
-                      <div>
-                        💍 {{ contact["anniversary"] }}
-                      </div>
+                        <span class="occasion-badge anniversary">
+                          💍 {{ contact["anniversary"] }}
+                        </span>
+                      {% else %}
+                        <span class="muted">—</span>
                       {% endif %}
+                    </td>
 
-                    </div>
+                  </tr>
 
-                  </div>
+                  {% endfor %}
 
-                </label>
+                </tbody>
 
-              </li>
+              </table>
 
-              {% endfor %}
-
-            </ul>
+            </div>
 
 
-            <!-- Save selection -->
             <div class="actions save-selection-bottom">
               <button type="submit">
                 Save Selection
@@ -200,11 +240,15 @@
     </main>
 
 
-    <!-- Contact selection JavaScript -->
     <script>
-      const searchInput = document.getElementById("contact-search");
-      const contactList = document.getElementById("contact-list");
-      const selectedCount = document.getElementById("selected-count");
+      const searchInput =
+        document.getElementById("contact-search");
+
+      const contactList =
+        document.getElementById("contact-list");
+
+      const selectedCount =
+        document.getElementById("selected-count");
 
       const selectAllButton =
         document.getElementById("select-all");
@@ -213,9 +257,10 @@
         document.getElementById("select-none");
 
 
-      const contacts = Array.from(
-        contactList.querySelectorAll(".contact")
-      );
+      const contacts =
+        Array.from(
+          contactList.querySelectorAll(".contact-row")
+        );
 
 
       function getCheckboxes() {
@@ -228,9 +273,10 @@
 
 
       function updateSelectedCount() {
-        const selected = getCheckboxes().filter(
-          (checkbox) => checkbox.checked
-        ).length;
+        const selected =
+          getCheckboxes().filter(
+            (checkbox) => checkbox.checked
+          ).length;
 
         selectedCount.textContent =
           `${selected} selected`;
@@ -238,19 +284,21 @@
 
 
       /*
-       * Search contacts
+       * Search contacts by name
        */
       searchInput.addEventListener("input", () => {
 
         const query =
-          searchInput.value.trim().toLowerCase();
+          searchInput.value
+            .trim()
+            .toLowerCase();
 
 
         contacts.forEach((contact) => {
 
           const name =
             contact
-              .querySelector(".contact-name")
+              .querySelector(".contact-name-cell")
               .textContent
               .toLowerCase();
 
@@ -279,7 +327,7 @@
 
 
       /*
-       * Clear all contacts
+       * Clear all selections
        */
       selectNoneButton.addEventListener("click", () => {
 
@@ -293,7 +341,7 @@
 
 
       /*
-       * Update counter whenever a checkbox changes
+       * Update counter when a checkbox changes
        */
       getCheckboxes().forEach((checkbox) => {
 
@@ -306,7 +354,7 @@
 
 
       /*
-       * Initial counter
+       * Initial count
        */
       updateSelectedCount();
 

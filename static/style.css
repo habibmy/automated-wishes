@@ -29,7 +29,7 @@ body {
 -------------------------------- */
 
 .container {
-    width: min(1100px, calc(100% - 32px));
+    width: min(1200px, calc(100% - 32px));
     margin: 0 auto;
 }
 
@@ -40,7 +40,7 @@ main {
 
 
 /* --------------------------------
-   Header / Navigation
+   Header
 -------------------------------- */
 
 header {
@@ -176,7 +176,7 @@ button:hover,
 
 
 /* --------------------------------
-   Notifications
+   Notices
 -------------------------------- */
 
 .notice {
@@ -203,7 +203,7 @@ button:hover,
 
 
 /* --------------------------------
-   Cards
+   Card
 -------------------------------- */
 
 .card {
@@ -251,7 +251,7 @@ button:hover,
 
 
 /* --------------------------------
-   Search / Selection toolbar
+   Search
 -------------------------------- */
 
 .selection-toolbar {
@@ -300,106 +300,134 @@ button:hover,
 
 
 /* --------------------------------
-   Contact list
+   Contacts table
 -------------------------------- */
 
-.contact-list {
-    display: grid;
+.table-wrapper {
+    width: 100%;
 
-    gap: 10px;
+    overflow-x: auto;
 
-    list-style: none;
-
-    padding: 0;
-
-    margin: 0;
-}
-
-
-.contact {
     border: 1px solid #e5e7eb;
 
     border-radius: 10px;
-
-    background: #ffffff;
-
-    transition:
-        border-color 0.15s ease,
-        background 0.15s ease,
-        box-shadow 0.15s ease;
 }
 
 
-.contact:hover {
-    border-color: #d1d5db;
-
-    box-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-
-.contact:has(input:checked) {
-    border-color: #9ca3af;
-
-    background: #f9fafb;
-}
-
-
-.contact-label {
-    display: flex;
-
-    align-items: flex-start;
-
-    gap: 14px;
-
+.contacts-table {
     width: 100%;
 
-    padding: 16px;
+    border-collapse: collapse;
 
-    cursor: pointer;
-}
-
-
-.contact input {
-    flex: 0 0 auto;
-
-    width: 18px;
-
-    height: 18px;
-
-    margin-top: 3px;
-
-    cursor: pointer;
-}
-
-
-.contact-content {
-    min-width: 0;
-}
-
-
-.contact-name {
-    font-weight: 700;
-
-    color: #111827;
-
-    overflow-wrap: anywhere;
-}
-
-
-.contact-details {
-    margin-top: 5px;
-
-    color: #6b7280;
+    background: #ffffff;
 
     font-size: 0.92rem;
 }
 
 
-.contact-details div {
-    margin-top: 2px;
+.contacts-table th {
+    padding: 12px 14px;
 
-    overflow-wrap: anywhere;
+    text-align: left;
+
+    font-size: 0.82rem;
+
+    font-weight: 700;
+
+    color: #4b5563;
+
+    background: #f9fafb;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    white-space: nowrap;
+}
+
+
+.contacts-table td {
+    padding: 13px 14px;
+
+    border-bottom: 1px solid #f0f1f3;
+
+    vertical-align: middle;
+}
+
+
+.contacts-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+.contact-row:hover {
+    background: #f9fafb;
+}
+
+
+.contact-row:has(input:checked) {
+    background: #f3f4f6;
+}
+
+
+.select-column {
+    width: 70px;
+
+    text-align: center !important;
+}
+
+
+.contacts-table input[type="checkbox"] {
+    width: 18px;
+
+    height: 18px;
+
+    cursor: pointer;
+}
+
+
+.contact-name-cell {
+    min-width: 180px;
+
+    font-weight: 700;
+
+    color: #111827;
+
+    white-space: nowrap;
+}
+
+
+.muted {
+    color: #9ca3af;
+}
+
+
+/* --------------------------------
+   Occasion badges
+-------------------------------- */
+
+.occasion-badge {
+    display: inline-block;
+
+    padding: 4px 8px;
+
+    border-radius: 6px;
+
+    font-size: 0.85rem;
+
+    white-space: nowrap;
+}
+
+
+.birthday {
+    background: #fff7ed;
+
+    color: #9a3412;
+}
+
+
+.anniversary {
+    background: #fdf4ff;
+
+    color: #86198f;
 }
 
 
@@ -538,6 +566,11 @@ button:hover,
 
     .selection-actions button {
         flex: 1;
+    }
+
+
+    .contacts-table {
+        min-width: 900px;
     }
 
 
