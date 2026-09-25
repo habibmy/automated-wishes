@@ -1,8 +1,8 @@
 import os
 from dataclasses import dataclass
 
+import yaml
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
@@ -23,35 +23,49 @@ class Settings:
 
 
 def load_settings() -> Settings:
+
+    with open("config.yaml", "r", encoding="utf-8") as file:
+        config = yaml.safe_load(file) or {}
+    carddav = config.get("carddav", {})
+    reminders = config.get("reminders", {})
+    notifications = config.get("notifications", {})
+
     return Settings(
         carddav_url=os.environ["CARDDAV_URL"],
         carddav_username=os.environ["CARDDAV_USERNAME"],
         carddav_password=os.environ["CARDDAV_PASSWORD"],
         carddav_timeout=int(
-            os.environ.get("CARDDAV_TIMEOUT", "15")
+            os.environ.get(
+                "CARDDAV_TIMEOUT",
+                carddav.get("timeout", "15"),
+            )
         ),
         wishes_include_group=os.environ.get(
             "WISHES_INCLUDE_GROUP",
-            "Wishes",
+            carddav.get("include_group", "Wishes"),
         ),
         wishes_exclude_group=os.environ.get(
             "WISHES_EXCLUDE_GROUP",
-            "No Wishes",
+            carddav.get("exclude_group", "No Wishes"),
         ),
         timezone=os.environ.get(
             "TIMEZONE",
-            "Asia/Kolkata",
+            reminders.get("timezone", "Asia/Kolkata"),
         ),
         dry_run=os.environ.get(
             "DRY_RUN",
-            "true",
-        ).lower() == "true",
+            str(notifications.get("dry_run", True)),
+        ).lower()
+        == "true",
         reminder_days_before=int(
-            os.environ.get("REMINDER_DAYS_BEFORE", "10")
+            os.environ.get(
+                "REMINDER_DAYS_BEFORE",
+                reminders.get("days_before", 10),
+            )
         ),
         ntfy_topic_url=os.environ["NTFY_TOPIC_URL"],
         reminder_check_time=os.environ.get(
             "REMINDER_CHECK_TIME",
-            "09:00",
+            reminders.get("check_time", "09:00"),
         ),
     )
