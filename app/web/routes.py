@@ -1,9 +1,10 @@
 from datetime import date
 
+import yaml
 from flask import Blueprint, redirect, render_template, request, url_for
 
-from app.config import load_settings
 from app.carddav import CardDAVClient, CardDAVError
+from app.config import load_settings
 from app.database.repository import ContactRepository
 from app.reminders.service import upcoming_occasions
 from app.sync.carddav import sync_carddav_contacts
@@ -78,4 +79,41 @@ def upcoming():
         "upcoming.html",
         occasions=occasions,
         today=date.today(),
+    )
+
+
+@contacts_bp.route("/settings", methods=["GET", "POST"])
+def settings():
+    settings = load_settings()
+
+    if request.method == "POST":
+        config = {
+            "carddav": {
+                "timeout": int(request.form["carddav_timeout"]),
+                "include_group": request.form["wishes_include_group"],
+                "exclude_group": request.form["wishes_exclude_group"],
+            },
+            "reminders": {
+                "timezone": request.form["timezone"],
+                "days_before": int(request.form["reminder_days_before"]),
+                "check_time": request.form["reminder_check_time"],
+            },
+            "notifications": {
+                "dry_run": request.form.get("dry_run") == "true",
+            },
+        }
+
+        with open("config.yaml", "w", encoding="utf-8") as file:
+            yaml.safe_dump(
+                config,
+                file,
+                sort_keys=False,
+            )
+
+        return redirect(url_for("contacts.settings", saved=1))
+
+    return render_template(
+        "settings.html",
+        settings=settings,
+        saved=request.args.get("saved"),
     )

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Settings - Automated Wishes</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+
+  <body>
+    <header>
+      <div class="container nav">
+        <a class="brand" href="{{ url_for('contacts.upcoming') }}">
+          Automated Wishes
+        </a>
+
+        <nav class="nav-links">
+          <a href="{{ url_for('contacts.upcoming') }}">Upcoming</a>
+          <a href="{{ url_for('contacts.contacts') }}">Contacts</a>
+          <a href="{{ url_for('contacts.settings') }}">Settings</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="page-header">
+          <div>
+            <h1>Settings</h1>
+
+            <p class="subtitle">
+              Configure how Automated Wishes handles reminders and contacts.
+            </p>
+          </div>
+        </div>
+
+        {% if saved %}
+        <div class="notice notice-success">Settings saved successfully.</div>
+        {% endif %}
+
+        <form method="post">
+          <div class="settings-grid">
+            <!-- Reminder settings -->
+            <section class="card settings-section">
+              <h2>Reminders</h2>
+
+              <p class="settings-description">
+                Configure when reminders should be generated.
+              </p>
+
+              <label class="setting">
+                <span>
+                  <strong>Days before</strong>
+                  <small>
+                    Send the reminder this many days before the occasion.
+                  </small>
+                </span>
+
+                <input
+                  type="number"
+                  name="reminder_days_before"
+                  min="0"
+                  value="{{ settings.reminder_days_before }}"
+                  required
+                />
+              </label>
+
+              <label class="setting">
+                <span>
+                  <strong>Check time</strong>
+                  <small> Time of day when the reminder scheduler runs. </small>
+                </span>
+
+                <input
+                  type="time"
+                  name="reminder_check_time"
+                  value="{{ settings.reminder_check_time }}"
+                  required
+                />
+              </label>
+
+              <label class="setting">
+                <span>
+                  <strong>Timezone</strong>
+                  <small> Timezone used by the reminder scheduler. </small>
+                </span>
+
+                <input
+                  type="text"
+                  name="timezone"
+                  value="{{ settings.timezone }}"
+                  required
+                />
+              </label>
+            </section>
+
+            <!-- CardDAV settings -->
+            <section class="card settings-section">
+              <h2>CardDAV</h2>
+
+              <p class="settings-description">
+                Configure contact synchronization behavior.
+              </p>
+
+              <label class="setting">
+                <span>
+                  <strong>Request timeout</strong>
+                  <small> Maximum time to wait for CardDAV requests. </small>
+                </span>
+
+                <input
+                  type="number"
+                  name="carddav_timeout"
+                  min="1"
+                  value="{{ settings.carddav_timeout }}"
+                  required
+                />
+              </label>
+
+              <label class="setting">
+                <span>
+                  <strong>Include group</strong>
+                  <small> Contact group used for included contacts. </small>
+                </span>
+
+                <input
+                  type="text"
+                  name="wishes_include_group"
+                  value="{{ settings.wishes_include_group }}"
+                  required
+                />
+              </label>
+
+              <label class="setting">
+                <span>
+                  <strong>Exclude group</strong>
+                  <small> Contact group excluded from reminders. </small>
+                </span>
+
+                <input
+                  type="text"
+                  name="wishes_exclude_group"
+                  value="{{ settings.wishes_exclude_group }}"
+                  required
+                />
+              </label>
+            </section>
+
+            <!-- Notification settings -->
+            <section class="card settings-section">
+              <h2>Notifications</h2>
+
+              <p class="settings-description">
+                Configure notification behavior.
+              </p>
+
+              <label class="setting setting-toggle">
+                <span>
+                  <strong>Dry run</strong>
+
+                  <small> Do not send real notifications when enabled. </small>
+                </span>
+
+                <input
+                  type="checkbox"
+                  name="dry_run"
+                  value="true"
+                  {%
+                  if
+                  settings.dry_run
+                  %}
+                  checked
+                  {%
+                  endif
+                  %}
+                />
+              </label>
+            </section>
+
+            <!-- Secrets -->
+            <section class="card settings-section">
+              <h2>Secrets</h2>
+
+              <p class="settings-description">
+                Sensitive credentials are managed through environment variables
+                and are not displayed here.
+              </p>
+
+              <div class="secret-status">
+                <div>✓ CardDAV credentials configured through environment</div>
+                <div>✓ ntfy topic configured through environment</div>
+              </div>
+            </section>
+          </div>
+
+          <div class="settings-actions">
+            <button type="submit">Save Settings</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </body>
+</html>
