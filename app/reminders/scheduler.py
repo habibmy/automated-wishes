@@ -1,9 +1,9 @@
-import time
 import logging
+import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from app.config import Settings
+from app.config import Settings, load_settings
 from app.database.repository import ContactRepository
 from app.notifications.ntfy import NtfyNotifier
 from app.reminders.service import send_reminders
@@ -12,18 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 def run_scheduler(
-    settings: Settings,
     repository: ContactRepository,
     notifier: NtfyNotifier,
 ) -> None:
-    timezone = ZoneInfo(settings.timezone)
-
-    logger.info(
-        "Reminder scheduler started (%s)",
-        settings.timezone,
-    )
+    logger.info("Reminder scheduler started")
 
     while True:
+        settings: Settings = load_settings()
+        timezone = ZoneInfo(settings.timezone)
+
         now = datetime.now(timezone)
         today = now.date()
 
@@ -50,6 +47,9 @@ def run_scheduler(
 
         time.sleep(max(1, seconds_until_next_run))
 
+        settings = load_settings()
+
+        timezone = ZoneInfo(settings.timezone)
         today = datetime.now(timezone).date()
 
         sent_count = send_reminders(
