@@ -4,7 +4,7 @@ import yaml
 from flask import Blueprint, redirect, render_template, request, url_for
 
 from app.carddav import CardDAVClient, CardDAVError
-from app.config import load_settings
+from app.config import _build_settings, load_settings
 from app.database.repository import ContactRepository
 from app.reminders.service import upcoming_occasions
 from app.sync.carddav import sync_carddav_contacts
@@ -87,28 +87,43 @@ def settings():
     settings = load_settings()
 
     if request.method == "POST":
+        try:
+            carddav_timeout = int(request.form.get("carddav_timeout", ""))
+            reminder_days_before = int(request.form.get("reminder_days_before", ""))
+        except ValueError:
+            return render_template(
+                "settings.html",
+                settings=settings,
+                error="Timeout and days before must be valid numbers.",
+            )
+
         config = {
             "carddav": {
-                "timeout": int(request.form["carddav_timeout"]),
-                "include_group": request.form["wishes_include_group"],
-                "exclude_group": request.form["wishes_exclude_group"],
+                "timeout": carddav_timeout,
+                "include_group": request.form.get("wishes_include_group", ""),
+                "exclude_group": request.form.get("wishes_exclude_group", ""),
             },
             "reminders": {
-                "timezone": request.form["timezone"],
-                "days_before": int(request.form["reminder_days_before"]),
-                "check_time": request.form["reminder_check_time"],
+                "timezone": request.form.get("timezone", ""),
+                "days_before": reminder_days_before,
+                "check_time": request.form.get("reminder_check_time", ""),
             },
             "notifications": {
                 "dry_run": request.form.get("dry_run") == "true",
             },
         }
 
-        with open("config.yaml", "w", encoding="utf-8") as file:
-            yaml.safe_dump(
-                config,
-                file,
-                sort_keys=False,
+        try:
+            _build_settings(config)
+        except (ValueError, TypeError) as exc:
+            return render_template(
+                "settings.html",
+                settings=settings,
+                error=str(exc),
             )
+
+        with open("config.yaml", "w", encoding="utf-8") as file:
+            yaml.safe_dump(config, file, sort_keys=False)
 
         return redirect(url_for("contacts.settings", saved=1))
 

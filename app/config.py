@@ -66,10 +66,7 @@ def _get_timezone(value: str) -> str:
     return value
 
 
-def load_settings() -> Settings:
-    with open("config.yaml", "r", encoding="utf-8") as file:
-        config = yaml.safe_load(file) or {}
-
+def _build_settings(config: dict) -> Settings:
     carddav = config.get("carddav", {})
     reminders = config.get("reminders", {})
     notifications = config.get("notifications", {})
@@ -78,17 +75,14 @@ def load_settings() -> Settings:
         "CARDDAV_TIMEOUT",
         carddav.get("timeout", 15),
     )
-
     reminder_days_before = os.environ.get(
         "REMINDER_DAYS_BEFORE",
         reminders.get("days_before", 10),
     )
-
     reminder_check_time = os.environ.get(
         "REMINDER_CHECK_TIME",
         reminders.get("check_time", "09:00"),
     )
-
     timezone = os.environ.get(
         "TIMEZONE",
         reminders.get("timezone", "Asia/Kolkata"),
@@ -121,5 +115,14 @@ def load_settings() -> Settings:
             "reminder days before",
         ),
         ntfy_topic_url=os.environ["NTFY_TOPIC_URL"],
-        reminder_check_time=_get_check_time(reminder_check_time),
+        reminder_check_time=_get_check_time(
+            reminder_check_time,
+        ),
     )
+
+
+def load_settings() -> Settings:
+    with open("config.yaml", "r", encoding="utf-8") as file:
+        config = yaml.safe_load(file) or {}
+
+    return _build_settings(config)

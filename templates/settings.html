@@ -41,8 +41,9 @@
 
         {% if saved %}
         <div class="notice notice-success">Settings saved successfully.</div>
+        {% endif %} {% if error %}
+        <div class="notice notice-error">{{ error }}</div>
         {% endif %}
-
         <form method="post">
           <div class="settings-grid">
             <!-- Reminder settings -->
