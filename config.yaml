@@ -2,11 +2,9 @@ carddav:
   timeout: 15
   include_group: Wishes
   exclude_group: No Wishes
-
 reminders:
   timezone: Asia/Kolkata
-  days_before: 10
-  check_time: "09:00"
-
+  days_before: 11
+  check_time: 09:00
 notifications:
   dry_run: true
