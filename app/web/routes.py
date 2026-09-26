@@ -1,11 +1,13 @@
 from datetime import date
 
+import requests
 import yaml
 from flask import Blueprint, redirect, render_template, request, url_for
 
 from app.carddav import CardDAVClient, CardDAVError
 from app.config import _build_settings, load_settings
 from app.database.repository import ContactRepository
+from app.notifications.ntfy import NtfyNotifier
 from app.reminders.service import upcoming_occasions
 from app.sync.carddav import sync_carddav_contacts
 
@@ -142,3 +144,23 @@ def settings():
         settings=settings,
         saved=request.args.get("saved"),
     )
+
+
+@contacts_bp.route("/settings/test-notification", methods=["POST"])
+def test_notification():
+    settings = load_settings()
+    notifier = NtfyNotifier(settings.ntfy_topic_url)
+
+    try:
+        notifier.send(
+            title="Automated Wishes test",
+            message="Test notification sent successfully.",
+        )
+    except requests.RequestException as exc:
+        return render_template(
+            "settings.html",
+            settings=settings,
+            error=f"Failed to send test notification: {exc}",
+        )
+
+    return redirect(url_for("contacts.settings", test_sent=1))

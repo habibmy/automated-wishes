@@ -42,6 +42,10 @@
 
         {% if saved %}
         <div class="notice notice-success">Settings saved successfully.</div>
+        {% endif %} {% if test_sent %}
+        <div class="notice notice-success">
+          Test notification sent successfully.
+        </div>
         {% endif %} {% if error %}
         <div class="notice notice-error">{{ error }}</div>
         {% endif %}
@@ -162,6 +166,15 @@
               </p>
 
               <label class="setting setting-toggle">
+                <form
+                  method="post"
+                  action="{{ url_for('contacts.test_notification') }}"
+                  class="test-notification"
+                >
+                  <button type="submit" class="button-secondary">
+                    Send Test Notification
+                  </button>
+                </form>
                 <span>
                   <strong>Dry run</strong>
 
