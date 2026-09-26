@@ -82,6 +82,16 @@ def upcoming():
     )
 
 
+@contacts_bp.route("/history")
+def history():
+    reminders = repository.get_reminder_history()
+
+    return render_template(
+        "history.html",
+        reminders=reminders,
+    )
+
+
 @contacts_bp.route("/settings", methods=["GET", "POST"])
 def settings():
     settings = load_settings()

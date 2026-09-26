@@ -1,9 +1,9 @@
 import sqlite3
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from app.contacts.models import Contact
-from datetime import date, datetime
+
 
 class ContactRepository:
     def __init__(self, database_path: str):
@@ -51,20 +51,14 @@ class ContactRepository:
 
             columns = {
                 row["name"]
-                for row in connection.execute(
-                    "PRAGMA table_info(contacts)"
-                ).fetchall()
+                for row in connection.execute("PRAGMA table_info(contacts)").fetchall()
             }
 
             if "birthday" not in columns:
-                connection.execute(
-                    "ALTER TABLE contacts ADD COLUMN birthday TEXT"
-                )
+                connection.execute("ALTER TABLE contacts ADD COLUMN birthday TEXT")
 
             if "anniversary" not in columns:
-                connection.execute(
-                    "ALTER TABLE contacts ADD COLUMN anniversary TEXT"
-                )
+                connection.execute("ALTER TABLE contacts ADD COLUMN anniversary TEXT")
 
     def save_contacts(
         self,
@@ -99,9 +93,7 @@ class ContactRepository:
                         contact.name,
                         "\n".join(contact.phones),
                         "\n".join(contact.emails),
-                        contact.birthday.isoformat()
-                        if contact.birthday
-                        else None,
+                        contact.birthday.isoformat() if contact.birthday else None,
                         contact.anniversary.isoformat()
                         if contact.anniversary
                         else None,
@@ -166,30 +158,16 @@ class ContactRepository:
             ).fetchall()
 
         return [self._row_to_contact(row) for row in rows]
-    
+
     def _row_to_contact(self, row: sqlite3.Row) -> Contact:
         return Contact(
             uid=row["source_uid"],
             name=row["name"],
-            phones=tuple(
-                phone
-                for phone in row["phones"].splitlines()
-                if phone
-            ),
-            emails=tuple(
-                email
-                for email in row["emails"].splitlines()
-                if email
-            ),
-            birthday=(
-                date.fromisoformat(row["birthday"])
-                if row["birthday"]
-                else None
-            ),
+            phones=tuple(phone for phone in row["phones"].splitlines() if phone),
+            emails=tuple(email for email in row["emails"].splitlines() if email),
+            birthday=(date.fromisoformat(row["birthday"]) if row["birthday"] else None),
             anniversary=(
-                date.fromisoformat(row["anniversary"])
-                if row["anniversary"]
-                else None
+                date.fromisoformat(row["anniversary"]) if row["anniversary"] else None
             ),
         )
 
@@ -241,4 +219,27 @@ class ContactRepository:
                     occasion_date.isoformat(),
                     datetime.now().isoformat(timespec="seconds"),
                 ),
-        )
+            )
+
+    def get_reminder_history(
+        self,
+        limit: int = 100,
+    ) -> list[sqlite3.Row]:
+        with self._connect() as connection:
+            return connection.execute(
+                """
+                SELECT
+                    sent_reminders.id,
+                    sent_reminders.contact_uid,
+                    contacts.name,
+                    sent_reminders.kind,
+                    sent_reminders.occasion_date,
+                    sent_reminders.sent_at
+                FROM sent_reminders
+                LEFT JOIN contacts
+                    ON contacts.source_uid = sent_reminders.contact_uid
+                ORDER BY sent_reminders.sent_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()

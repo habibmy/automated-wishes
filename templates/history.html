@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Reminder History - Automated Wishes</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+
+  <body>
+    <header>
+      <div class="container nav">
+        <a class="brand" href="{{ url_for('contacts.upcoming') }}">
+          Automated Wishes
+        </a>
+
+        <nav class="nav-links">
+          <a href="{{ url_for('contacts.upcoming') }}">Upcoming</a>
+          <a href="{{ url_for('contacts.contacts') }}">Contacts</a>
+          <a href="{{ url_for('contacts.history') }}">History</a>
+          <a href="{{ url_for('contacts.settings') }}">Settings</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="page-header">
+          <div>
+            <h1>Reminder History</h1>
+
+            <p class="subtitle">Recently sent reminders.</p>
+          </div>
+        </div>
+
+        {% if reminders %}
+        <div class="table-wrapper">
+          <table class="contacts-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Occasion</th>
+                <th>Occasion Date</th>
+                <th>Sent At</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for reminder in reminders %}
+              <tr class="contact-row">
+                <td class="contact-name-cell">
+                  {{ reminder["name"] or "Unknown contact" }}
+                </td>
+
+                <td>
+                  <span class="occasion-badge {{ reminder['kind'] }}">
+                    {{ reminder["kind"] | title }}
+                  </span>
+                </td>
+
+                <td>{{ reminder["occasion_date"] }}</td>
+
+                <td>{{ reminder["sent_at"] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="card empty">No reminders have been sent yet.</div>
+        {% endif %}
+      </div>
+    </main>
+  </body>
+</html>
